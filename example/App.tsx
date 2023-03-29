@@ -5,7 +5,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>{ExpoSerialport.getTheme()}</Text>
-      <Text>{JSON.stringify(ExpoSerialport.getDeviceList(), null, 2)}</Text>
+      <Text>{JSON.stringify(ExpoSerialport.getUsbDevices(), null, 2)}</Text>
     </View>
   )
 }

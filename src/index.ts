@@ -4,6 +4,11 @@ export function getTheme(): string {
   return ExpoSerialportModule.getTheme();
 }
 
-export function getDeviceList(): unknown[] {
-  return ExpoSerialportModule.getDeviceList();
+export function getUsbDevices(): unknown[] {
+  return ExpoSerialportModule.getUsbDevices();
 }
+
+export default {
+  getTheme,
+  getUsbDevices,
+};
