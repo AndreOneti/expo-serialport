@@ -28,20 +28,15 @@ class ExpoSerialportModule : Module() {
     return context.getSharedPreferences(context.packageName + ".settings", Context.MODE_PRIVATE)
   }
 
-  private fun getDeviceList(): ArrayList<UsbDevice> {
-    var deviceList: ArrayList<UsbDevice> = ArrayList<UsbDevice>()
-
+  private fun getDeviceList(): List<UsbDevice>? {
     var usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
 
-    var devicesList: HashMap<String, UsbDevice> = usbManager.getDeviceList()
+    val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
 
-    for (usbDevide in devicesList.values) {
-      deviceList.add(usbDevide)
-    }
-    // devicesList.forEach { (key, device) ->
-    //   deviceList.add(device)
-    // }
+    // "Device Name: ${usbDevice.deviceName},
+    // Vendor ID: ${usbDevice.vendorId},
+    // Product ID: ${usbDevice.productId}"
 
-    return deviceList
+    return usbDeviceList
   }
 }
