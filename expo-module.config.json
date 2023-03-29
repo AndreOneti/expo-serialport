@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android", "web"],
+  "ios": {
+    "modules": ["ExpoSerialportModule"]
+  },
+  "android": {
+    "modules": ["com.andreoneti.serialport.ExpoSerialportModule"]
+  }
+}
