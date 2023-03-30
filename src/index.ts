@@ -18,6 +18,10 @@ export function getUsbDevices(): UsbDevice[] {
   return ExpoSerialportModule.getUsbDevices();
 }
 
+export function connectToDevice(deviceName: string): void {
+  return ExpoSerialportModule.connectToDevice(deviceName);
+}
+
 export default {
   getUsbDevices,
 };

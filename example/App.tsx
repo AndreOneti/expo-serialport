@@ -6,7 +6,7 @@ export default function App() {
     <View style={styles.container}>
       <Text>{JSON.stringify(ExpoSerialport.getUsbDevices(), null, 2)}</Text>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({

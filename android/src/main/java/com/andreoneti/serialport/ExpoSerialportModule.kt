@@ -1,9 +1,12 @@
 package com.andreoneti.serialport
 
 import android.content.Context
+import android.content.SharedPreferences
+
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.content.SharedPreferences
+import android.hardware.usb.UsbInterface
+import android.hardware.usb.UsbDeviceConnection
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
@@ -20,6 +23,10 @@ class ExpoSerialportModule : Module() {
 
     Function("getUsbDevices") {
       return@Function getUsbDevices()
+    }
+
+    Function("connectToDevice") { deviceName: String ->
+      return@Function connectToDevice(deviceName)
     }
   }
 
@@ -54,5 +61,26 @@ class ExpoSerialportModule : Module() {
     }
 
     return usbDevicesArray
+  }
+
+  fun connectToDevice(deviceName: String): UsbDeviceConnection? {
+    val usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
+    val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
+
+    val usbDevice: UsbDevice? = usbDeviceList?.find { it.deviceName == deviceName }
+
+    if (usbDevice != null) {
+      val usbInterface: UsbInterface? = usbDevice.getInterface(0)
+
+      val usbDeviceConnection: UsbDeviceConnection? = usbManager.openDevice(usbDevice)
+
+      if (usbDeviceConnection != null && usbDeviceConnection.claimInterface(usbInterface, true)) {
+        return usbDeviceConnection
+      } else {
+        usbDeviceConnection?.close()
+      }
+    }
+
+    return null
   }
 }
