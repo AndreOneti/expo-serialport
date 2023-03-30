@@ -33,8 +33,8 @@ class ExpoSerialportModule : Module() {
       return@Function connectToDevice(deviceName)
     }
 
-    Function("comunicate") { deviceName: String ->
-      return@Function comunicate(deviceName)
+    Function("sendUsbData") { deviceName: String, data: String ->
+      return@Function sendUsbData(deviceName, data)
     }
   }
 
@@ -45,8 +45,12 @@ class ExpoSerialportModule : Module() {
     return context.getSharedPreferences(context.packageName + ".settings", Context.MODE_PRIVATE)
   }
 
+  private fun getUsbManager(): UsbManager {
+    return context?.getSystemService(Context.USB_SERVICE) as UsbManager
+  }
+
   private fun getUsbDevices(): WritableArray {
-    val usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
+    val usbManager: UsbManager = getUsbManager()
     val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
 
     val usbDevicesArray: WritableArray = WritableNativeArray()
@@ -72,7 +76,7 @@ class ExpoSerialportModule : Module() {
   }
 
   private fun connectToDevice(deviceName: String): UsbDeviceConnection? {
-    val usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
+    val usbManager: UsbManager = getUsbManager()
     val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
 
     val usbDevice: UsbDevice? = usbDeviceList?.find { it.deviceName == deviceName }
@@ -92,39 +96,66 @@ class ExpoSerialportModule : Module() {
     return null
   }
 
-  private fun comunicate(deviceName: String): String {
-    // Get the USB device and open a connection
-    val usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
+  /**
+   * Sends a byte array of data to a USB device and reads the response.
+   *
+   * @param deviceName The USB deviceName to send data to.
+   * @param data The byte array of data to send.
+   * @return The response from the USB device as a string, or null if an error occurs.
+   */
+  private fun sendUsbData(deviceName: String, data: String): String? {
+    val usbManager: UsbManager = getUsbManager()
     val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
 
     val device: UsbDevice? = usbDeviceList?.find { it.deviceName == deviceName }
+    if (device == null) {
+      return null
+    }
+
+    // Open the device connection
     val connection = usbManager.openDevice(device)
 
-    // Find the bulk endpoints for reading and writing data
-    val inEndpoint = device?.getInterface(0)?.getEndpoint(0)
-    val outEndpoint = device?.getInterface(0)?.getEndpoint(1)
+    // If the connection is null, return null
+    if (connection == null) {
+      return null
+    }
 
-    // Send a control message to configure the device
-    val requestType = UsbConstants.USB_TYPE_VENDOR or UsbConstants.USB_DIR_OUT
-    val request = 0x01
-    val value = 0
-    val index = 0
-    val buffer = byteArrayOf(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08)
-    val length = buffer.size
-    val timeout = 1000
-    val result = connection?.controlTransfer(requestType, request, value, index, buffer, length, timeout)
+    try {
+      // Claim the interface
+      if (!connection.claimInterface(device.getInterface(0), true)) {
+        return "Error claiming interface"
+      }
 
-    // Read data from the device
-    val readBuffer = ByteArray(1024)
-    val readTimeout = 5000
-    val readLength = connection?.bulkTransfer(inEndpoint, readBuffer, readBuffer.size, readTimeout)
+      // Get the endpoint
+      val endpoint = device.getInterface(0).getEndpoint(0)
 
-    // Print the data to the console
-    val data = readBuffer.copyOf(readLength ?: 0)
+      // Send the data
+      val dataBytes = data.toByteArray()
+      val sent = connection.bulkTransfer(endpoint, dataBytes, dataBytes.size, 5000)
 
-    // Close the connection
-    connection?.close()
+      // If the data was not sent, return an error message
+      if (sent < 0) {
+        return "Error sending data"
+      }
 
-    return "Received data: ${data.toHexString()}"
+      // Read the response
+      val buffer = ByteArray(endpoint.maxPacketSize)
+      val received = connection.bulkTransfer(endpoint, buffer, buffer.size, 5000)
+
+      // If the response was not received, return an error message
+      if (received < 0) {
+        return "Error receiving data"
+      }
+
+      // Return the response as a string
+      return String(buffer, 0, received)
+    } catch (e: Exception) {
+      // If an exception is thrown, return null
+      return null
+    } finally {
+      // Release the interface and close the connection
+      connection.releaseInterface(device.getInterface(0))
+      connection.close()
+    }
   }
 }

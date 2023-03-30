@@ -31,12 +31,28 @@ export function connectToDevice(deviceName: string): UsbDeviceConnection {
   return ExpoSerialportModule.connectToDevice(deviceName);
 }
 
-export function comunicate(deviceName: string): string {
-  return ExpoSerialportModule.comunicate(deviceName);
+export function sendUsbData(deviceName: string, data: string): string | null {
+  const response = ExpoSerialportModule.sendUsbData(deviceName, data);
+
+  if (!response) {
+    return null;
+  }
+
+  if (
+    [
+      "Error claiming interface",
+      "Error receiving data",
+      "Error sending data",
+    ].includes(response)
+  ) {
+    throw new Error(response);
+  }
+
+  return response;
 }
 
 export default {
   getUsbDevices,
   connectToDevice,
-  comunicate
+  sendUsbData,
 };
