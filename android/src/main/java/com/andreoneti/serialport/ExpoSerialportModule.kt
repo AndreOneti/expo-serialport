@@ -1,5 +1,8 @@
 package com.andreoneti.serialport
 
+import android.app.PendingIntent
+
+import android.content.Intent
 import android.content.Context
 import android.content.SharedPreferences
 
@@ -96,6 +99,18 @@ class ExpoSerialportModule : Module() {
     return null
   }
 
+  private fun requestPermission(device: UsbDevice): Unit {
+    val ACTION_USB_PERMISSION: String = "com.android.example.USB_PERMISSION"
+    val usbManager: UsbManager = getUsbManager()
+    val permissionIntent = PendingIntent.getBroadcast(
+      context,
+      0,
+      Intent(ACTION_USB_PERMISSION),
+      0
+    )
+    usbManager.requestPermission(device, permissionIntent)
+  }
+
   /**
    * Sends a byte array of data to a USB device and reads the response.
    *
@@ -111,6 +126,8 @@ class ExpoSerialportModule : Module() {
     if (device == null) {
       return "Error to find device"
     }
+
+    requestPermission(device)
 
     // Open the device connection
     val connection = usbManager.openDevice(device)
