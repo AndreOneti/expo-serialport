@@ -18,10 +18,6 @@ class ExpoSerialportModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ExpoSerialport")
 
-    Function("getTheme") {
-      return@Function "system"
-    }
-
     Function("getUsbDevices") {
       return@Function getUsbDevices()
     }
@@ -34,18 +30,6 @@ class ExpoSerialportModule : Module() {
     return context.getSharedPreferences(context.packageName + ".settings", Context.MODE_PRIVATE)
   }
 
-  // private fun getDeviceList(): List<UsbDevice>? {
-  //   var usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
-
-  //   val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
-
-  //   // "Device Name: ${usbDevice.deviceName},
-  //   // Vendor ID: ${usbDevice.vendorId},
-  //   // Product ID: ${usbDevice.productId}"
-
-  //   return usbDeviceList
-  // }
-
   private fun getUsbDevices(): WritableArray {
     val usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
     val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
@@ -55,10 +39,17 @@ class ExpoSerialportModule : Module() {
     if (usbDeviceList != null) {
       for (usbDevice in usbDeviceList) {
         val usbDeviceMap: WritableMap = WritableNativeMap()
+
         usbDeviceMap.putString("deviceName", usbDevice.deviceName)
         usbDeviceMap.putInt("vendorId", usbDevice.vendorId)
         usbDeviceMap.putInt("productId", usbDevice.productId)
-        // add more properties as needed
+        usbDeviceMap.putInt("deviceClass", usbDevice.deviceClass)
+        usbDeviceMap.putInt("deviceSubClass", usbDevice.deviceSubClass)
+        usbDeviceMap.putInt("deviceProtocol", usbDevice.deviceProtocol)
+        usbDeviceMap.putInt("interfaceCount", usbDevice.interfaceCount)
+        usbDeviceMap.putString("manufactureName", usbDevice.manufactureName)
+        usbDeviceMap.putString("productName", usbDevice.productName)
+        usbDeviceMap.putString("serialNumber", usbDevice.serialNumber)
 
         usbDevicesArray.pushMap(usbDeviceMap)
       }

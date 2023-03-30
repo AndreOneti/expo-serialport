@@ -1,14 +1,23 @@
 import ExpoSerialportModule from "./ExpoSerialportModule";
 
-export function getTheme(): string {
-  return ExpoSerialportModule.getTheme();
+interface UsbDevice {
+  version: string;
+  vendorId: number;
+  productId: number;
+  deviceName: string;
+  productName: string;
+  deviceClass: number;
+  serialNumber: string;
+  deviceProtocol: number;
+  deviceSubClass: number;
+  interfaceCount: number;
+  manufactureName: string;
 }
 
-export function getUsbDevices(): unknown[] {
+export function getUsbDevices(): UsbDevice[] {
   return ExpoSerialportModule.getUsbDevices();
 }
 
 export default {
-  getTheme,
   getUsbDevices,
 };
