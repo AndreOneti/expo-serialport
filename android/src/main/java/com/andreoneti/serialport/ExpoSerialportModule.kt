@@ -44,10 +44,8 @@ class ExpoSerialportModule : Module() {
         usbDeviceMap.putInt("vendorId", usbDevice.vendorId)
         usbDeviceMap.putInt("productId", usbDevice.productId)
         usbDeviceMap.putInt("deviceClass", usbDevice.deviceClass)
-        usbDeviceMap.putInt("deviceSubClass", usbDevice.deviceSubClass)
         usbDeviceMap.putInt("deviceProtocol", usbDevice.deviceProtocol)
         usbDeviceMap.putInt("interfaceCount", usbDevice.interfaceCount)
-        usbDeviceMap.putString("manufactureName", usbDevice.manufactureName)
         usbDeviceMap.putString("productName", usbDevice.productName)
         usbDeviceMap.putString("serialNumber", usbDevice.serialNumber)
 

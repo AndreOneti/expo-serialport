@@ -1,6 +1,6 @@
 {
   "name": "expo-serialport",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Simple serial port wrapper for android.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
