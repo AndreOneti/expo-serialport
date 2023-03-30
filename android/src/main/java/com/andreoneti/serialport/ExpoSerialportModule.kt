@@ -5,7 +5,9 @@ import android.content.SharedPreferences
 
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.hardware.usb.UsbRequest
 import android.hardware.usb.UsbInterface
+import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDeviceConnection
 
 import com.facebook.react.bridge.Arguments
@@ -17,6 +19,8 @@ import com.facebook.react.bridge.WritableNativeMap
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.modules.Module
 
+fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
+
 class ExpoSerialportModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ExpoSerialport")
@@ -27,6 +31,10 @@ class ExpoSerialportModule : Module() {
 
     Function("connectToDevice") { deviceName: String ->
       return@Function connectToDevice(deviceName)
+    }
+
+    Function("comunicate") { deviceName: String ->
+      return@Function comunicate(deviceName)
     }
   }
 
@@ -63,7 +71,7 @@ class ExpoSerialportModule : Module() {
     return usbDevicesArray
   }
 
-  fun connectToDevice(deviceName: String): UsbDeviceConnection? {
+  private fun connectToDevice(deviceName: String): UsbDeviceConnection? {
     val usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
     val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
 
@@ -82,5 +90,41 @@ class ExpoSerialportModule : Module() {
     }
 
     return null
+  }
+
+  private fun comunicate(deviceName: String): String {
+    // Get the USB device and open a connection
+    val usbManager: UsbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
+    val usbDeviceList: List<UsbDevice>? = usbManager.deviceList.values.toList()
+
+    val device: UsbDevice? = usbDeviceList?.find { it.deviceName == deviceName }
+    val connection = usbManager.openDevice(device)
+
+    // Find the bulk endpoints for reading and writing data
+    val inEndpoint = device?.getInterface(0)?.getEndpoint(0)
+    val outEndpoint = device?.getInterface(0)?.getEndpoint(1)
+
+    // Send a control message to configure the device
+    val requestType = UsbConstants.USB_TYPE_VENDOR or UsbConstants.USB_DIR_OUT
+    val request = 0x01
+    val value = 0
+    val index = 0
+    val buffer = byteArrayOf(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08)
+    val length = buffer.size
+    val timeout = 1000
+    val result = connection?.controlTransfer(requestType, request, value, index, buffer, length, timeout)
+
+    // Read data from the device
+    val readBuffer = ByteArray(1024)
+    val readTimeout = 5000
+    val readLength = connection?.bulkTransfer(inEndpoint, readBuffer, readBuffer.size, readTimeout)
+
+    // Print the data to the console
+    val data = readBuffer.copyOf(readLength ?: 0)
+
+    // Close the connection
+    connection?.close()
+
+    return "Received data: ${data.toHexString()}"
   }
 }

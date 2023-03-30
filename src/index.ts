@@ -1,6 +1,6 @@
 import ExpoSerialportModule from "./ExpoSerialportModule";
 
-interface UsbDevice {
+export interface UsbDevice {
   version: string;
   vendorId: number;
   productId: number;
@@ -14,14 +14,29 @@ interface UsbDevice {
   manufactureName: string;
 }
 
+export interface UsbDeviceConnection {
+  fileDescriptor: number;
+  requestWaitMillis: number;
+  protocol: number;
+  interfaceCount: number;
+  rawDescriptors: Uint8Array;
+  serial: string | null;
+}
+
 export function getUsbDevices(): UsbDevice[] {
   return ExpoSerialportModule.getUsbDevices();
 }
 
-export function connectToDevice(deviceName: string): void {
+export function connectToDevice(deviceName: string): UsbDeviceConnection {
   return ExpoSerialportModule.connectToDevice(deviceName);
+}
+
+export function comunicate(deviceName: string): string {
+  return ExpoSerialportModule.comunicate(deviceName);
 }
 
 export default {
   getUsbDevices,
+  connectToDevice,
+  comunicate
 };
