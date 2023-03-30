@@ -109,7 +109,7 @@ class ExpoSerialportModule : Module() {
 
     val device: UsbDevice? = usbDeviceList?.find { it.deviceName == deviceName }
     if (device == null) {
-      return null
+      return "Error to find device"
     }
 
     // Open the device connection
@@ -117,7 +117,7 @@ class ExpoSerialportModule : Module() {
 
     // If the connection is null, return null
     if (connection == null) {
-      return null
+      return "Error to open connection"
     }
 
     try {
