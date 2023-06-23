@@ -76,17 +76,32 @@ android {
     versionCode 1
     versionName "0.1.0"
   }
+
   lintOptions {
     abortOnError false
+  }
+
+  publishing {
+    singleVariant("release") {
+      withSourcesJar()
+    }
   }
 }
 
 repositories {
+  mavenLocal()
+  maven {
+    url("$rootDir/../node_modules/react-native/android")
+  }
+  maven { url 'https://jitpack.io' }
+  google()
   mavenCentral()
+  jcenter()
 }
 
 dependencies {
   implementation project(':expo-modules-core')
+
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${getKotlinVersion()}"
   implementation 'com.facebook.react:react-native:0.71.4'
 }
