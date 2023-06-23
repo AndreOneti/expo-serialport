@@ -24,7 +24,7 @@ export function hasPermissionAsync(deviceId: number): Promise<boolean> {
   return ExpoSerialportModule.hasPermissionAsync(deviceId);
 }
 export function requestPermissionAsync(deviceId: number): Promise<void> {
-  return ExpoSerialportModule.hasPermissionAsync(deviceId);
+  return ExpoSerialportModule.requestPermissionAsync(deviceId);
 }
 
 export default {
