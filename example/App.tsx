@@ -9,6 +9,8 @@ export default function App() {
     console.log({ device });
     if (!device) return;
     try {
+      await ExpoSerialport.requestPermissionAsync(device.deviceId);
+
       const serialNumber = await ExpoSerialport.getSerialNumberAsync(
         device.deviceId
       );

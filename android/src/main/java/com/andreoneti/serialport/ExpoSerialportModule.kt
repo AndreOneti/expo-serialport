@@ -115,7 +115,6 @@ class ExpoSerialportModule : Module() {
         usbDeviceMap.putInt("deviceProtocol", usbDevice.getDeviceProtocol())
         usbDeviceMap.putInt("interfaceCount", usbDevice.getInterfaceCount())
         usbDeviceMap.putString("manufacturerName", usbDevice.getManufacturerName())
-        // usbDeviceMap.putString("serialNumber", usbDevice.getSerialNumber())
 
         usbDevicesArray.pushMap(usbDeviceMap)
       }
@@ -140,13 +139,14 @@ class ExpoSerialportModule : Module() {
       context,
       0,
       Intent(ACTION_USB_PERMISSION),
-      0
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
     val permissionReceiver = object : BroadcastReceiver() {
       override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_USB_PERMISSION) {
-          val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
+          intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
+          val granted: Boolean = usbManager.hasPermission(device)
           if (granted) {
             promise.resolve(null)
           } else {
